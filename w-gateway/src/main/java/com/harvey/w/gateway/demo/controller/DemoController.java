@@ -1,7 +1,9 @@
 package com.harvey.w.gateway.demo.controller;
 
+import com.harvey.w.demo.service.DemoService;
 import com.harvey.w.gateway.common.entity.CommonResponse;
 import com.harvey.w.gateway.common.entity.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/demo")
 public class DemoController {
+    @Autowired
+    private DemoService demoService;
     @RequestMapping("/testDemo")
     public CommonResponse<String> testDemo() {
         CommonResponse<String> responseMessage = new CommonResponse<String>();
@@ -36,7 +40,7 @@ public class DemoController {
     @RequestMapping("/{id}")
     public CommonResponse<String> get(@PathVariable("id") String id){
         CommonResponse<String> responseMessage = new CommonResponse<String>();
-        String entity = "test";
+        String entity = demoService.helloWorld();
         responseMessage.setData(entity);
         return responseMessage;
     }

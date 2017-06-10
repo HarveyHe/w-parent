@@ -2,62 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>w-demo-service-parent</artifactId>
+        <groupId>com.harvey.w</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.harvey.w</groupId>
-    <artifactId>w-gateway</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
-    <name>w-gateway</name>
-    <packaging>jar</packaging>
-
+    <artifactId>w-demo-service-impl</artifactId>
+    <name>Common Service Center - Demo Service Implement</name>
+    <description>Demo服务实现</description>
     <dependencies>
         <dependency>
-            <groupId>com.gsst</groupId>
-            <artifactId>eaf-core</artifactId>
-            <version>1.0.40</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.security</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.security.oauth</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.harvey.w</groupId>
+            <artifactId>w-demo-service</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.gsst</groupId>
-            <artifactId>eaf-dubbo</artifactId>
-            <version>0.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.gsst</groupId>
-            <artifactId>eaf-boot</artifactId>
-            <version>0.0.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j</artifactId>
-            <version>1.3.3.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>4.1.0.RELEASE</version>
-        </dependency>
-
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
@@ -65,23 +25,27 @@
         </dependency>
 
         <dependency>
-            <groupId>com.harvey.w</groupId>
-            <artifactId>w-demo-service</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.gsst</groupId>
+            <artifactId>eaf-dubbo</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-jdbc</artifactId>
+            <version>8.0.24</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.36</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gsst</groupId>
+            <artifactId>eaf-core</artifactId>
+            <version>1.0.40</version>
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.xml</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources/</directory>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -91,7 +55,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.harvey.w.gateway.main.Application</mainClass>
+                            <mainClass>com.gsst.eaf.core.boot.Boot</mainClass>
                             <classpathPrefix>./lib/</classpathPrefix>
                             <useUniqueVersions>flase</useUniqueVersions>
                         </manifest>
@@ -121,8 +85,8 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
+
 
 </project>
