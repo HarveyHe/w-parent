@@ -1,0 +1,7 @@
+# Run Listeners
+org.springframework.boot.SpringApplicationRunListener=\
+com.harvey.w.boot.init.ApplicationRunListener
+
+#Web initializer
+org.springframework.web.WebApplicationInitializer=\
+com.harvey.w.boot.init.ServletContextInitializer

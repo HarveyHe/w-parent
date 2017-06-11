@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p" xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+	<!-- 数据池,修改id同时修改配置文件中数据连接池名称 -->
+	<bean id="poolProperties" class="org.apache.tomcat.jdbc.pool.PoolProperties">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 在log中打印出回收Connection的错误信息，包括在哪个地方用了Connection却忘记关闭了 -->
+		<property name="logAbandoned" value="true" />
+		<!-- #是否自动回收超时连接 -->
+		<property name="removeAbandoned" value="true" />
+		<!-- #超时时间(以秒数为单位) -->
+		<property name="removeAbandonedTimeout" value="300" />
+		<!-- 最大连接数据库连接数，设置为0时，表示没有限制； -->
+		<property name="maxActive" value="${ds.maxActive}" />
+		<!-- 最大空闲连接数 -->
+		<property name="maxIdle" value="${ds.maxActive}" />
+		<!--最少空闲连接数 -->
+		<property name="minIdle" value="${ds.minIdle}" />
+		<!--MaxWait是最大等待秒钟数，这里取值-1，表示无限等待,最大建立连接等待时间。如果超过此时间将接到异常 -->
+		<property name="maxWait" value="2000" />
+		<!-- 当数据库连接池中的连接被创建而长时间不使用的情况下，该连接会自动回收并失效,所以需要验证此连接还是否可用 -->
+		<property name="validationQuery" value="select 1" />
+		<property name="defaultAutoCommit" value="true" />
+		<property name="jdbcInterceptors" value="org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport(threshold=2000)" />
+		<property name="testWhileIdle" value="true" />
+	</bean>
+	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+		<constructor-arg index="0" ref="poolProperties" />
+	</bean>
+
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="annotatedClasses">
+			<bean class="com.harvey.w.core.hibernate.HibernateEntityClassesFactoryBean">
+				<property name="basePackages" value="${sys.basePackage}" />
+			</bean>
+		</property>
+		<property name="mappingLocations">
+			<bean class="com.harvey.w.core.hibernate.HibernateMappingLocationsFactoryBean">
+				<property name="basePackages" value="${sys.basePackage}" />
+			</bean>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.query.substitutions">true 'Y', false 'N'</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.format_sql">false</prop>
+				<prop key="hibernate.use_sql_comments">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="universalDao" class="com.harvey.w.core.dao.DefaultUniversalDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="nativeSqlDao" class="com.harvey.w.core.dao.DefaultNativeSqlDao">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+</beans>
