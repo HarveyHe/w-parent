@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+	<http entry-point-ref="web.entryPoint" security-context-repository-ref="web.securityContextRepository">
+		<access-denied-handler ref="web.accessDniedHandler" />
+		<custom-filter ref="web.contextFilter" after="SECURITY_CONTEXT_FILTER" />
+		<custom-filter ref="web.logoutFilter" position="LOGOUT_FILTER" />
+		<custom-filter ref="web.usernamePasswordAuthenticationFilter" position="FORM_LOGIN_FILTER" />
+		<custom-filter ref="web.tokenAuthenticationFilter" position="REMEMBER_ME_FILTER"/>
+		<!-- <custom-filter ref="web.concurrentSessionFilterFilter" position="CONCURRENT_SESSION_FILTER"/> -->
+		<!-- <session-management session-authentication-strategy-ref="web.concurrentSessionControlStrategy"/> -->
+		<anonymous key="doesNotMatter" />
+		<custom-filter ref="web.filterSecurityInterceptor" before="FILTER_SECURITY_INTERCEPTOR" />
+	</http>
+	
+	<beans:bean id="web.preLoginFilter" class="com.harvey.w.core.spring.security.filter.PreAuthenticationFilter">
+		<beans:property name="filterProcessesUrl" value="${web.loginProcessUrl}" />
+	</beans:bean>
+
+	<authentication-manager alias="web.authenticationManager">
+		<authentication-provider ref="web.formLoginAuthenticationProvider" />
+	</authentication-manager>
+	
+	<beans:bean id="web.securityContextRepository" class="com.harvey.w.core.spring.security.EafSecurityContextRepository" />
+	
+	<beans:bean id="web.tokenAuthenticationFilter" class="com.harvey.w.core.spring.security.tokenaccess.filter.TokenAuthenticationFilter">
+		<beans:property name="providers">
+			<beans:list>
+				<beans:bean class="com.harvey.w.core.spring.security.tokenaccess.provider.DefaultTokenAuthenticationProvider"></beans:bean>
+			</beans:list>
+		</beans:property>
+		<beans:property name="failureHandlers">
+			<beans:list>
+				<beans:bean class="com.harvey.w.core.spring.security.tokenaccess.handler.TokenAccessAuthFailureHandler" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="web.contextFilter" class="com.harvey.w.core.spring.security.ContextFilter"></beans:bean>
+
+	<beans:bean id="web.entryPoint" class="com.harvey.w.core.spring.security.AuthenticationEntryPoint">
+		<beans:constructor-arg index="0" value="${web.formLoginUrl}" />
+		<beans:property name="accessDeniedHandler" ref="web.accessDniedHandler" />
+		<beans:property name="returnUrlParamName" value="${web.returnUrlParamName}" />
+	</beans:bean>
+
+	<beans:bean id="web.filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<beans:property name="securityMetadataSource" ref="web.urlMetadataSource" />
+		<beans:property name="authenticationManager" ref="web.authenticationManager" />
+		<beans:property name="accessDecisionManager" ref="web.accessDecisionManager" />
+	</beans:bean>
+
+	<beans:bean id="web.accessDecisionManager" class="com.harvey.w.core.spring.security.decision.UrlAccessDecisionManager" />
+
+	<beans:bean id="web.formLoginAuthenticationProvider" class="com.harvey.w.core.spring.security.provider.FormLoginAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="${web.userService}" />
+		<beans:property name="passwordEncoder" ref="web.userPasswordEncoder" />
+	</beans:bean>
+
+	<beans:bean id="web.userPasswordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
+
+	<beans:bean id="web.urlMetadataSource" class="com.harvey.w.core.spring.security.metadata.UserUrlMetadataSource">
+		<beans:property name="commonUrls">
+			<beans:set>
+				<beans:value>${web.loginSuccessDefaultTargetUrl}</beans:value>
+				<beans:value>/index.jsp</beans:value>
+				<beans:value>/download/**</beans:value>
+				<beans:value>/process/**</beans:value>
+				<beans:value>/servlet/**</beans:value>
+				<beans:value>/longtask/**</beans:value>
+			</beans:set>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="web.logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+		<beans:constructor-arg name="logoutSuccessUrl" value="${web.logoutSuccessURL}"></beans:constructor-arg>
+		<beans:constructor-arg name="handlers">
+			<beans:bean class="com.harvey.w.core.spring.security.handler.LogoutHandlerFactory"></beans:bean>
+		</beans:constructor-arg>
+		<beans:property name="filterProcessesUrl" value="${web.logoutURL}" />
+	</beans:bean>
+
+	<beans:bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+
+	<beans:bean id="web.usernamePasswordAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+		<beans:property name="usernameParameter" value="${web.loginUsernameParameter}" />
+		<beans:property name="passwordParameter" value="${web.loginPasswordParameter}" />
+		<beans:property name="filterProcessesUrl" value="${web.loginProcessUrl}" />
+		<beans:property name="authenticationManager" ref="web.authenticationManager" />
+		<beans:property name="authenticationSuccessHandler" ref="web.authenticationSuccessHandler" />
+		<beans:property name="authenticationFailureHandler" ref="web.authenticationFailureHandler" />
+		<beans:property name="authenticationDetailsSource">
+			<beans:bean class="com.harvey.w.core.spring.security.EafAuthenticationDetailsSource" />
+		</beans:property>
+		<!-- <beans:property name="sessionAuthenticationStrategy" ref="web.concurrentSessionControlStrategy" /> -->
+	</beans:bean>
+
+	<beans:bean id="web.authenticationSuccessHandler" class="com.harvey.w.core.spring.security.handler.MultiAuthenticationSuccessHandler" />
+	<beans:bean id="web.authenticationFailureHandler" class="com.harvey.w.core.spring.security.handler.MultiAuthenticationFailureHandler" />
+	<beans:bean id="web.accessDniedHandler" class="com.harvey.w.core.spring.security.handler.MultiAccessDeniedHandler">
+		<beans:property name="errorPage" value="${web.accessDeniedURL}" />
+	</beans:bean>
+
+	<beans:bean id="web.loginExceptionCodeMap" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<beans:property name="sourceMap">
+			<beans:map value-type="java.lang.String" key-type="java.lang.Class">
+				<!-- 密码错误 -->
+				<beans:entry value="01" key="org.springframework.security.authentication.BadCredentialsException" />
+				<!-- 用户不存在 -->
+				<beans:entry value="02" key="org.springframework.security.core.userdetails.UsernameNotFoundException" />
+				<!-- 用户被锁定 -->
+				<beans:entry value="02" key="org.springframework.security.authentication.LockedException" />
+				<!-- 用户被禁用 -->
+				<beans:entry value="02" key="org.springframework.security.authentication.DisabledException" />
+				<!-- 账号已过期 -->
+				<beans:entry value="02" key="org.springframework.security.authentication.AccountExpiredException" />
+				<!-- 密码已过期 -->
+				<beans:entry value="01" key="org.springframework.security.authentication.CredentialsExpiredException" />
+				<!-- userDetailService返回了nul值 -->
+				<beans:entry value="03" key="org.springframework.security.authentication.AuthenticationServiceException" />
+				<!-- 验证错误 -->
+				<beans:entry value="04" key="com.harvey.w.core.spring.security.exception.SecurityCodeException" />
+				<!-- 并发session控制 -->
+				<beans:entry value="05"
+					key="org.springframework.security.web.authentication.session.SessionAuthenticationException" />
+			</beans:map>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean class="com.harvey.w.core.spring.security.handler.RedirectSupoortAuthFailureHandler">
+		<beans:property name="defaultFailureUrl" value="${web.formLoginUrl}" />
+		<beans:property name="exceptionCode" value="${web.loginFailureCodeKey}" />
+		<!-- <beans:property name="parameterName" value="${web.loginFailureRedirectParameterName}" /> -->
+		<beans:property name="exceptionCodeMap" ref="web.loginExceptionCodeMap" />
+		<beans:property name="returnUrlParamName" value="${web.returnUrlParamName}" />
+	</beans:bean>
+
+	<beans:bean class="com.harvey.w.core.spring.security.handler.RestAuthFailureHandler">
+		<beans:property name="parameterName" value="${web.loginFailureRestParameterName}" />
+		<beans:property name="exceptionCode" value="${web.loginFailureCodeKey}" />
+		<beans:property name="exceptionCodeMap" ref="web.loginExceptionCodeMap" />
+	</beans:bean>
+
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="${web.formLoginUrl}" />
+	</beans:bean>
+
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="${web.logoutSuccessURL}" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/js/**" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/*.dpkg" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/*.ico" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/**/*.ico" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/dorado/**" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/images/**" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/test.**.d" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/ui.**.d" />
+	</beans:bean>
+	<beans:bean parent="web.anonymousUrl">
+		<beans:property name="urlPattern" value="/rest/**" />
+	</beans:bean>
+	<beans:bean id="web.anonymousUrl" class="com.harvey.w.core.spring.security.AnonymousUrl" abstract="true"></beans:bean>
+</beans:beans>						
