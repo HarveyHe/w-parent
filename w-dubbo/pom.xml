@@ -6,11 +6,11 @@
 
     <groupId>com.harvey.w</groupId>
     <artifactId>w-dubbo</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 
 
-    <name>eaf-duboo-bundle</name>
-    <description>w duboo bundle</description>
+    <name>w-dubbo-bundle</name>
+    <description>w dubbo bundle</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -47,9 +47,9 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.gsst</groupId>
-            <artifactId>eaf-core</artifactId>
-            <version>1.0.31</version>
+            <groupId>com.harvey.w</groupId>
+            <artifactId>w-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
